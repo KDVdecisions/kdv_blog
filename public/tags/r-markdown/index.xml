@@ -6,10 +6,19 @@
     <description>Recent content in R Markdown on A Hugo website</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Thu, 23 Jul 2015 21:13:14 -0500</lastBuildDate>
+    <lastBuildDate>Sat, 18 Apr 2020 00:00:00 +0000</lastBuildDate>
     
 	<atom:link href="/tags/r-markdown/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>Obtaining Spatial Data from Esri REST APIs</title>
+      <link>/2020/04/18/obtaining-spatial-data-from-esri-rest-apis/</link>
+      <pubDate>Sat, 18 Apr 2020 00:00:00 +0000</pubDate>
+      
+      <guid>/2020/04/18/obtaining-spatial-data-from-esri-rest-apis/</guid>
+      <description>There is a massive amount of spatial data available through Esri REST APIs. It is a popular publishing format for federal, state, and county governments meaning that many of these data fall within the public domain. At the time of writing this there are 7266 datasets published on data.gov available through Esri REST APIs. Many of these data are also available for download via other formats such as Geodatabase, shape, and zipped files.</description>
+    </item>
     
     <item>
       <title>Hello R Markdown</title>
