@@ -1,6 +1,6 @@
 baseurl = "/"
 languageCode = "en-us"
-title = "A Hugo website"
+title = "KDV Decision Analysis"
 theme = "hugo-lithium"
 googleAnalytics = ""
 disqusShortname = ""
@@ -8,7 +8,6 @@ ignoreFiles = ["\\.Rmd$", "\\.Rmarkdown$", "_files$", "_cache$"]
 
 [permalinks]
     post = "/:year/:month/:day/:slug/"
-
 [[menu.main]]
     name = "About"
     url = "/about/"
