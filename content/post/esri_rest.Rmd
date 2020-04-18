@@ -140,7 +140,7 @@ leaflet() %>%
   addPolygons(data=invasives, weight=3, color="red")
 ```
 
-Great!  We have our invasive plant locations, as well as the boundaries to the taho national forest.  Except, it seems that we have a decent number of invasive plant observations that fall outside the boundary of the national forest.  If you remember, we passed a bounding box to the API, therefor we got all observations that intersected with the given bounding box rather than the polygon itself.
+Great!  We have our invasive plant locations, as well as the boundaries to the Taho National Forest.  Except, it seems that we have a decent number of invasive plant observations that fall outside the boundary of the national forest.  If you remember, we passed a bounding box to the API, therefor we got all observations that intersected with the given bounding box rather than the polygon itself.
 
 Let's filter out all of the observations from the invasive plant API that fall outside of the taho national forest polygon.
 ```{r filter_invasives, message=FALSE, echo=TRUE}
