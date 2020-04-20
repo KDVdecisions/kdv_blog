@@ -1,5 +1,5 @@
 ---
-title: "Obtaining Spatial Data from Esri REST APIs"
+title: "Obtaining Spatial Data from Esri REST APIs in R"
 author: "Eliot Dixon"
 date: 2020-04-18
 categories: ["R"]
