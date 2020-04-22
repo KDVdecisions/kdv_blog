@@ -9,7 +9,7 @@ tags: ["R Markdown", "R", "APIs", "Spatial Data", "Leaflet", "Esri"]
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
-There is a massive amount of spatial data available through Esri REST APIs.  It is a popular publishing format for federal, state, and county governments meaning that many of these data fall within the public domain.  At the time of writing this there are 7266 datasets published on data.gov available through Esri REST APIs.  Many of these data are also available for download via other formats such as Geodatabase, shape, and zipped files.  An advantage of learning to use Esri REST services over these other formats is that a user may filter their data prior to storing it locally, limiting download size and required data cleaning/filtering.  Users may also go on to implement use of these APIs within programs and scripts.  Another advantage of utilizing Esri REST platforms is that they are available to non Esri clients allowing users to avoid costly subscription fees surrounding ArcGIS and other Esri software.  Throughout this tutorial we will be exploring how to query, clean, and map spatial data describing administrative forest boundaries. These data were published by the U.S. Forest Service.
+A massive amount of spatial data is available through Esri REST APIs.  It is a popular publishing format for federal, state, and county governments so many of these data fall within the public domain.  At the time of writing, there are 7266 datasets published on data.gov available through Esri REST APIs.  Many of these data are also available for download via other formats such as Geodatabase, shape, and zipped files.  An advantage of learning to use Esri REST services over these other formats is that a user may filter their data prior to storing it locally, limiting download size and required data cleaning/filtering.  Users may also go on to implement use of these APIs within programs and scripts.  Another advantage of utilizing Esri REST platforms is that they are available to non Esri clients allowing users to avoid costly subscription fees surrounding ArcGIS and other Esri software.  Throughout this tutorial we will be exploring how to query, clean, and map spatial data describing administrative forest boundaries. These data were published by the U.S. Forest Service.
 
 It may surprise you to learn that it is often more challenging to navigate to the Rest API than to query it, especially for new users.  Just for the sake of making this tutorial applicable to other Esri REST APIs, we will go through the initial steps of locating these resources.
 
@@ -20,17 +20,17 @@ You should see a pane titled Map Services which looks like the following:
 
 ![](/post/esri_rest_files/map-services.png)
 
-Click the 'here' hyperlink and this will take you to a folder containing a collection of REST services published by the U.S. Forest Service.  Feel free to browse around and explore all the available data sets here!  When you are ready, select **EDW/EDW_ForestSystemBoundaries_01**
-, which should be roughly a third of the way down.  This will navigate you to the directory containing the data layers we are interested in for this tutorial.  If you'd like you can select ArcGIS Online Map Viewer near the top of the page to further explore our data layers on a map.  This is a great tool to explore the different fields within your data which will inform your query.
+Click the 'here' hyperlink to go to a folder containing a collection of REST services published by the U.S. Forest Service.  Feel free to browse around and explore all the available data sets here!  When you are ready, select **EDW/EDW_ForestSystemBoundaries_01**
+, which should be roughly a third of the way down.  This will navigate you to the directory containing the data layers we want for this tutorial.  If you'd like, you can select ArcGIS Online Map Viewer near the top of the page to further explore our data layers on a map.  This is a great tool to explore the different fields within your data which will inform your query.
 
-Moving forward, select the **Administrative Forest Boundaries - National Extent (0)** layer and scroll to the bottom of the page and select Query.  This will bring you to a page in which you can practice querying the REST API within the context of your browser.  Each field you see here represents a parameter within a query URL made to the relevant API.  This page is your friend.  Seriously.  If you're attempting to implement the use of an Esri REST API within an R script it is extremely helpful to have a steril and easy-to-read environment to play with different parameters in your query.
+Moving forward, select the **Administrative Forest Boundaries - National Extent (0)** layer then scroll to the bottom of the page and select Query.  This will bring you to a page in which you can practice querying the REST API within the context of your browser.  Each field you see here represents a parameter within a query URL made to the relevant API.  This page is your friend.  Seriously.  If you're attempting to implement the use of an Esri REST API within an R script it is extremely helpful to have a sterile and easy-to-read environment to play with different parameters in your query.
 We'll begin querying via the 'Where' parameter.  If you have any experience with SQL this should be fairly straightforward as the 'Where' parameter takes a SQL WHERE clause as it's argument.  If not, we will give you the tools you need to begin constructing simple WHERE clauses.
 
-WHERE clauses are used to obtain an occurence(s) within a data set where a certain field is equal to a given value.  The general format is:
+WHERE clauses are used to obtain an occurrence(s) within a data set where a certain field is equal to a given value.  The general format is:
 ```
 WHERE <field> = '<some value>'.  
 ```
-In the context of this API the WHERE is assumed so we can leave that off.
+In the context of this API the WHERE term is assumed, so we can leave that off.
 
 Go ahead and enter:
 
@@ -41,7 +41,7 @@ FORESTNAME = 'Angeles National Forest'
 
 into the WHERE field.  
 
-Enter an asterisk (\*)into the Out Fields parameter.  This indicates to return all fields within the dataset.  Hit **Query (GET)** at the bottom of the page and you should see some HTML describing an entry within the dataset appear at the base of your window.  Horray!  You have successfully queried an Esri REST API!
+Enter an asterisk (\*)into the Out Fields parameter.  This indicates you wish to return all fields within the dataset.  Hit **Query (GET)** at the bottom of the page and you should see some HTML describing an entry within the dataset appear at the base of your window.  Hurray!  You have successfully queried an Esri REST API!
 
 Moving forward, let's generalize this WHERE clause just a bit.  For instance, let's say you aren't quite certain about the name of the national forest polygon you're interested in obtaining.  Or, better yet, let's say you're implementing this query within a program which takes in user input describing which national forest polygon to request, however you can't depend on your users to enter a full or exact forest name.  Try:
 
@@ -49,11 +49,11 @@ Moving forward, let's generalize this WHERE clause just a bit.  For instance, le
 FORESTNAME LIKE '%Tahoe National%'
 ```
 
-This essentially makes a request to the API for an occurrence where the value within the FORESTNAME field contains the characters 'Tahoe National' potentially with other characters at the beginning or end.
+This essentially makes a request to the API for an occurrence where the value within the FORESTNAME field contains the characters 'Tahoe National' potentially with other characters at the beginning or end.  It is important to note that this parameter is still case sensitive.  
 
 Now that we've played with the query page just a bit, let's begin to see how we might implement this in R.  
 
-If you haven't already noticed, each time you hit Query (GET) the URL in the top of your browser updates.  This is your query URL.  We will be using a few libraries within this tutorial for obtaining and viewing spatial data.
+If you haven't already noticed, each time you hit Query (GET) the URL in the top of your browser updates.  This is your query URL.  We will be using a few libraries within this tutorial for obtaining and viewing spatial data.  If you don't have these packages you should install them via `install.packages('')` before proceeding.
 
 ```{r libraries, echo=TRUE,warning=FALSE,message=FALSE}
 library(sf)
