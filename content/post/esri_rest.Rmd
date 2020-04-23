@@ -9,9 +9,9 @@ tags: ["R Markdown", "R", "APIs", "Spatial Data", "Leaflet", "Esri"]
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
-A massive amount of spatial data is available through Esri REST APIs.  It is a popular publishing format for federal, state, and county governments so many of these data fall within the public domain.  At the time of writing, there are 7266 datasets published on data.gov available through Esri REST APIs.  Many of these data are also available for download via other formats such as Geodatabase, shape, and zipped files.  An advantage of learning to use Esri REST services over these other formats is that a user may filter their data prior to storing it locally, limiting download size and required data cleaning/filtering.  Users may also go on to implement use of these APIs within programs and scripts.  Another advantage of utilizing Esri REST platforms is that they are available to non Esri clients allowing users to avoid costly subscription fees surrounding ArcGIS and other Esri software.  Throughout this tutorial we will be exploring how to query, clean, and map spatial data describing administrative forest boundaries. These data were published by the U.S. Forest Service.
+A massive amount of spatial data is available through Esri REST APIs.  It is a popular publishing format for federal, state, and county governments so many of these data fall within the public domain.  At the time of writing, there are 7266 datasets published on data.gov, 3426  sets on data.gov.uk, and 859 on open.canada.ca all of which are available through Esri REST APIs.  Many of these data are also available for download via other formats such as Geodatabase, shape, and zipped files.  An advantage of learning to use Esri REST services over these other formats is that a user may filter their data prior to storing it locally, limiting download size and required data cleaning/filtering.  Users may also go on to implement use of these APIs within programs and scripts and know that they are using the most current data available.  Another advantage of utilizing Esri REST platforms is that they are available to non Esri clients allowing users to avoid costly subscription fees surrounding ArcGIS and other Esri software.  Throughout this tutorial, we will be exploring how to query, clean, and map spatial data describing administrative forest boundaries. These data are published by the U.S. Forest Service.
 
-It may surprise you to learn that it is often more challenging to navigate to the Rest API than to query it, especially for new users.  Just for the sake of making this tutorial applicable to other Esri REST APIs, we will go through the initial steps of locating these resources.
+It may surprise you to learn that it is often more challenging to navigate to the Rest API than to query it, especially for new users.  For the sake of making this tutorial applicable to other Esri REST APIs, we will go through the initial steps of locating these resources.
 
 Let's begin at the page for [Forest Service Enterprise Data](https://data.fs.usda.gov/geodata/edw/index.php)
 
@@ -23,7 +23,7 @@ You should see a pane titled Map Services which looks like the following:
 Click the 'here' hyperlink to go to a folder containing a collection of REST services published by the U.S. Forest Service.  Feel free to browse around and explore all the available data sets here!  When you are ready, select **EDW/EDW_ForestSystemBoundaries_01**
 , which should be roughly a third of the way down.  This will navigate you to the directory containing the data layers we want for this tutorial.  If you'd like, you can select ArcGIS Online Map Viewer near the top of the page to further explore our data layers on a map.  This is a great tool to explore the different fields within your data which will inform your query.
 
-Moving forward, select the **Administrative Forest Boundaries - National Extent (0)** layer then scroll to the bottom of the page and select Query.  This will bring you to a page in which you can practice querying the REST API within the context of your browser.  Each field you see here represents a parameter within a query URL made to the relevant API.  This page is your friend.  Seriously.  If you're attempting to implement the use of an Esri REST API within an R script it is extremely helpful to have a sterile and easy-to-read environment to play with different parameters in your query.
+Moving forward, select the **Administrative Forest Boundaries - National Extent (0)** layer, then scroll to the bottom of the page and select Query.  This will bring you to a page in which you can practice querying the REST API within the context of your browser.  Each field you see here represents a parameter within a query URL made to the relevant API.  This page is your friend.  Seriously.  If you're attempting to implement the use of an Esri REST API within an R script it is extremely helpful to have a sterile and easy-to-read environment to play with different parameters in your query.
 We'll begin querying via the 'Where' parameter.  If you have any experience with SQL this should be fairly straightforward as the 'Where' parameter takes a SQL WHERE clause as it's argument.  If not, we will give you the tools you need to begin constructing simple WHERE clauses.
 
 WHERE clauses are used to obtain an occurrence(s) within a data set where a certain field is equal to a given value.  The general format is:
@@ -53,7 +53,7 @@ This essentially makes a request to the API for an occurrence where the value wi
 
 Now that we've played with the query page just a bit, let's begin to see how we might implement this in R.  
 
-If you haven't already noticed, each time you hit Query (GET) the URL in the top of your browser updates.  This is your query URL.  We will be using a few libraries within this tutorial for obtaining and viewing spatial data.  If you don't have these packages you should install them via `install.packages('')` before proceeding.
+If you haven't already noticed, each time you hit Query (GET) the URL in the top of your browser updates.  This is your query URL.  We will be using a few libraries within this tutorial for obtaining and viewing spatial data.  If you don't have the following packages you should install them via `install.packages('')` before proceeding.
 
 ```{r libraries, echo=TRUE,warning=FALSE,message=FALSE}
 library(sf)
@@ -63,7 +63,7 @@ library(dplyr)
 library(urltools)
 ```
 
-Change the **Format** field at the bottom of your page to GeoJSON and make another query.  This time you should be redirected to a page containing the GeoJSON describing the output from your query.  Copy the URL and pass it to geojson_sf()
+Change the **Format** field at the bottom of your page to GeoJSON and make another query.  This time you should be redirected to a page containing the GeoJSON file describing the output from your query.  GeoJSON is a simple and lightweight file format based on JSON (JavaScript Object Notation) designed to represent spatial data alongside non-spatial features.  GeoJSON and JSON objects are syntactically identical to the code one would use to create a JavaScript object.  Now that we have the location of the relevant GeoJSON file, copy the URL from the top of your page and pass it to `geojson_sf()`.
 
 ```{r read_query, include=TRUE, warning=FALSE}
 forest <- geojson_sf("https://apps.fs.usda.gov/arcx/rest/services/EDW/EDW_ForestSystemBoundaries_01/MapServer/0/query?where=FORESTNAME+LIKE+%27%25Tahoe+National%25%27&text=&objectIds=&time=&geometry=&geometryType=esriGeometryEnvelope&inSR=&spatialRel=esriSpatialRelIntersects&relationParam=&outFields=*&returnGeometry=true&returnTrueCurves=false&maxAllowableOffset=&geometryPrecision=&outSR=&having=&returnIdsOnly=false&returnCountOnly=false&orderByFields=&groupByFieldsForStatistics=&outStatistics=&returnZ=false&returnM=false&gdbVersion=&historicMoment=&returnDistinctValues=false&resultOffset=&resultRecordCount=&queryByDistance=&returnExtentOnly=false&datumTransformation=&parameterValues=&rangeValues=&quantizationParameters=&featureEncoding=esriDefault&f=geojson")
@@ -77,17 +77,18 @@ leaflet() %>%
   addProviderTiles("Esri.WorldStreetMap") %>%
   addPolygons(data=forest, weight=2, color="blue")
 ```
-Now let's try querying another Forest Service Esri REST API.  However, this time we'll construct the query from within R.  Let's use the Current Invasive Plant Locations API to get the locations of observed invasive plans that fall within the Tahoe National Forest.
-```{r query_invasive, echo=TRUE, warning = F, message=F, results=F}
+Now let's try querying another Forest Service Esri REST API.  However, this time we'll construct the query from within R.  Let's utilize the data we just obtained to get the invasive plant locations that fall within the Tahoe National Forest.  To accomplish this, we will take the polygon that describes the Tahoe National Forest and use that data to define a bounding box.  A bounding box is a rectangle represented by four points (xmax, ymax, xmin, ymin) in which a spatial object is fully enclosed.  We will then pass that bounding box to the Current Invasive Plant Location API and request the data that intersects it.
+
+```{r query_invasive_short, echo=TRUE, warning = F, message=F, results=F}
 #baseURL for  Forest Service invasive species API
 baseURL <- "https://apps.fs.usda.gov/arcx/rest/services/EDW/EDW_InvasiveSpecies_01/MapServer/0/query?"
-#bounding box of taho national forest polygon
+#bounding box of tahoe national forest polygon
 bbox <- st_bbox(forest)
 #convert bounding box to character
 bbox <- toString(bbox)
 #encode for use within URL
 bbox <- urltools::url_encode(bbox)
-#EPSG code for coordinate reference system used by taho national forest polygon sf object
+#EPSG code for coordinate reference system used by tahoe national forest polygon sf object
 epsg <- st_crs(forest)$epsg
 
 #set parameters for query
@@ -109,24 +110,40 @@ query <- urltools::param_set(baseURL,key="geometry", value=bbox) %>%
   param_set(key="featureEncoding", value="esriDefault")
   
 invasives <- geojson_sf(query)
+
 ```
 Let's take a moment to look through the parameters of our query.  
 
 **geometry**
 
-The first parameter is the input geometry, to which we pass the bounding box of the Taho National Forest.  A bounding box is a rectangle represented by four points (xmax, ymax, xmin, ymin) in which a spatial object is fully enclosed.  You'll notice that before we pass the bounding box to the API we do a bit of formatting.  First it is converted to the character class with the toString() function.  Then we pass it to url_encode(), this is because things like spaces and commas are represented within URLs with special ASCII character combinations.
+The first parameter is the input geometry, to which we pass the bounding box of the Tahoe National Forest.  You'll notice that before we pass the bounding box to the API we do a bit of formatting. First it is converted to the character class with the toString() function.  We then pass it to url_encode(), because things like spaces and commas are represented within URLs with special ASCII character combinations.
 
 **inSR**
 
-We then set the input spatial reference.  Here we are supplying the API with the coordinate reference system of our polygon.  Without getting into too much detail, a coordinate reference system (commonly reffered to as a CRS) is a reference point which provides context to coordinates (the coordinates of our bounding box in this case).  If you're curious to learn more about coordinate reference systems an excellent explaination can be found [here](https://www.earthdatascience.org/courses/earth-analytics/spatial-data-r/intro-to-coordinate-reference-systems/).  
+We then set the input spatial reference.  Here we are supplying the API with the coordinate reference system of our polygon.  Without getting into too much detail, a coordinate reference system (commonly referred to as a CRS) is a reference point which provides context to coordinates (the coordinates of our bounding box in this case).  If you're curious to learn more about coordinate reference systems an excellent explaination can be found [here](https://www.earthdatascience.org/courses/earth-analytics/spatial-data-r/intro-to-coordinate-reference-systems/).  
 
 **resultRecordCount**
 
-This parameter simply dictates how many observations we would like the API to return.  
+This parameter simply dictates how many observations we would like the API to return.  The maximum number of records that can be returned is 1000, which is the default value for most REST APIs.  The maximum value of records that can be returned is set by the server administrator.  If leave this field blank 1000 values will be returned, indicating that the number of requested records exceeds the maximum.  Also, another indicator that the maximum number of records has been met is a boolean variable will appear at the top of the requested GeoJSON page called exceededTransferLimit.
+
+
+If you would like to obtain a set of records within a given geometry which exceed the maximum, you should split your geometry over multiple requests, such that each individual geometry contains less than the given maximum.  If you'd like to give this a try on your own the following code is a good start.
+
+```{r split_request, message=FALSE, echo=TRUE}
+#Convert bounding box of tahoe national forest to polygon
+
+bbox <- st_bbox(forest) %>%
+  st_as_sfc()
+
+#split bounding box polygon into a 2x2 grid
+bbox_split <- st_make_grid(bbox,n=2)
+```
+A full solution to this can be found on our github page
+---------------------------------finish ^^^-------------------------------------------
 
 **spatialRel**
 
-Spatial relationship, given the value "esriSpatialRelIntersects" is stating that we want all observations that intersect with the input geometry, which is the bounding box of our polygon in this case.  
+Spatial relationship, given the value "esriSpatialRelIntersects" is stating that we want observations which intersect with the input geometry, which is the bounding box of our polygon in this case.
 
 **f**
 
@@ -134,10 +151,36 @@ format is the file format in which our data will be returned.
 
 **outFields**
 
-This is the parameter which dictates which fields of the dataset will be returned.  We pass an asterisk in order to get all fields.
+This is the parameter which dictates which fields of the dataset will be returned.  We pass an asterisk in order to get all fields.  Alternatively if we just wanted the name of the plant alongside its geometry we could pass ACCEPTED_COMMON_NAME to outFields.
 
-We will not go into the remaining parameters, if you'd like to explore them yourself you can do so within the [API reference](https://gis.fws.gov/arcgis/sdk/rest/index.html#//02ss0000006v000000).  The rest of parameters are set at their default value, and if so desired, could have been left within the base URL to avoid so many calls to param_set.  However, for the purposes of this tutorial they were seperated to give a clear representation of parameters versus the base URL.  Let's take a look at our data!
+We will not go into the remaining parameters, if you'd like to explore them yourself you can do so within the [API reference](https://gis.fws.gov/arcgis/sdk/rest/index.html#//02ss0000006v000000).  
 
+The rest of parameters I've set at their default value.  Note, if the default values of a parameter are being used their values do not need to be set within your query. For the purposes of this tutorial they were included to give a clear representation of parameters versus the base URL.  The following (significantly smaller) chunk of code would accomplish the same goal.
+
+```{r query_invasive, echo=TRUE, warning = F, message=F, results=F}
+#baseURL for  Forest Service invasive species API
+baseURL <- "https://apps.fs.usda.gov/arcx/rest/services/EDW/EDW_InvasiveSpecies_01/MapServer/0/query?"
+#bounding box of tahoe national forest polygon
+bbox <- st_bbox(forest)
+#convert bounding box to character
+bbox <- toString(bbox)
+#encode for use within URL
+bbox <- urltools::url_encode(bbox)
+#EPSG code for coordinate reference system used by tahoe national forest polygon sf object
+epsg <- st_crs(forest)$epsg
+
+#set parameters for query
+query <- urltools::param_set(baseURL,key="geometry", value=bbox) %>%
+  param_set(key="inSR", value=epsg) %>%
+  param_set(key="resultRecordCount", value=500) %>%
+  param_set(key="spatialRel", value="esriSpatialRelIntersects") %>%
+  param_set(key="f", value="geojson") %>%
+  param_set(key="outFields", value="*")
+invasives <- geojson_sf(query)
+
+```
+
+Let's take a look at our data!
 
 ```{r plot_invasives, message=FALSE, echo=TRUE}
 leaflet() %>%
@@ -146,16 +189,16 @@ leaflet() %>%
   addPolygons(data=invasives, weight=3, color="red")
 ```
 
-Great!  We have our invasive plant locations, as well as the boundaries to the Taho National Forest.  Except, it seems that we have a decent number of invasive plant observations that fall outside the boundary of the national forest.  If you remember, we passed a bounding box to the API, therefor we got all observations that intersected with the given bounding box rather than the polygon itself.
+Great!  We have our invasive plant locations, as well as the boundaries to the Tahoe National Forest.  Except, it seems that we have a decent number of invasive plant observations that fall outside the boundary of the national forest.  If you remember, we passed a bounding box to the API, therefore we got all observations that intersected the bounding box rather than the polygon itself.
 
-Let's filter out all of the observations from the invasive plant API that fall outside of the Taho National Forest polygon.
+Let's filter out all of the observations from the invasive plant API that fall outside of the Tahoe National Forest polygon.
+
 ```{r filter_invasives, message=FALSE, echo=TRUE}
-#get sparse matrix showing which rows in invasives intersect with forest
-inRows <- st_intersects(invasives,forest)
-#convert to logical matrix
-inRows <- lengths(inRows) > 0
-#filter invasives to only include those that intersect with forest
-insideInvasives <- dplyr::filter(invasives,inRows)
+
+#spatially join invasives and forest
+insideInvasives <- st_join(invasives,forest)
+#remove na values (i.e. values where there is no spatial overlap)
+insideInvasives <- na.omit(insideInvasives)
 
 leaflet() %>%
   addProviderTiles("Esri.WorldStreetMap") %>%
@@ -164,4 +207,22 @@ leaflet() %>%
 ```
 
 And there you have it!  We hope this tutorial has been informative!
+
+References and Useful Linkes:
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 

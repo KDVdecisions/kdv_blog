@@ -17,7 +17,7 @@
       <pubDate>Sat, 18 Apr 2020 00:00:00 +0000</pubDate>
       
       <guid>/2020/04/18/obtaining-spatial-data-from-esri-rest-apis-in-r/</guid>
-      <description>There is a massive amount of spatial data available through Esri REST APIs. It is a popular publishing format for federal, state, and county governments meaning that many of these data fall within the public domain. At the time of writing this there are 7266 datasets published on data.gov available through Esri REST APIs. Many of these data are also available for download via other formats such as Geodatabase, shape, and zipped files.</description>
+      <description>A massive amount of spatial data is available through Esri REST APIs. It is a popular publishing format for federal, state, and county governments so many of these data fall within the public domain. At the time of writing, there are 7266 datasets published on data.gov, 3426 sets on data.gov.uk, and 859 on open.canada.ca all of which are available through Esri REST APIs.</description>
     </item>
     
   </channel>
