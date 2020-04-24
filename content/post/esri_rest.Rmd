@@ -9,7 +9,9 @@ tags: ["R Markdown", "R", "APIs", "Spatial Data", "Leaflet", "Esri"]
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
-A massive amount of spatial data is available through Esri REST APIs.  It is a popular publishing format for federal, state, and county governments so many of these data fall within the public domain.  At the time of writing, there are 7266 datasets published on data.gov, 3426  sets on data.gov.uk, and 859 on open.canada.ca all of which are available through Esri REST APIs.  Many of these data are also available for download via other formats such as Geodatabase, shape, and zipped files.  An advantage of learning to use Esri REST services over these other formats is that a user may filter their data prior to storing it locally, limiting download size and required data cleaning/filtering.  Users may also go on to implement use of these APIs within programs and scripts and know that they are using the most current data available.  Another advantage of utilizing Esri REST platforms is that they are available to non Esri clients allowing users to avoid costly subscription fees surrounding ArcGIS and other Esri software.  Throughout this tutorial, we will be exploring how to query, clean, and map spatial data describing administrative forest boundaries. These data are published by the U.S. Forest Service.
+A massive amount of spatial data is available through Esri REST APIs.  It is a popular publishing format for federal, state, and county governments so many of these data fall within the public domain.  At the time of writing, there are 7266 datasets published on [data.gov](data.gov), 3426  sets on [data.gov.uk](data.gov.uk), and 859 on [open.canada.ca](open.canada.ca) all of which are available through Esri REST APIs.  A large set of Esri REST APIs which provide data on European countries can be found at [European Environment Agency Discover Map Services](http://discomap.eea.europa.eu/Index/Index.aspx).
+
+Many of these data are also available for download via other formats such as Geodatabase, shape, and zipped files.  An advantage of learning to use Esri REST services over these other formats is that a user may filter their data prior to storing it locally, limiting download size and required data cleaning/filtering.  Users may also go on to implement use of these APIs within programs and scripts and know that they are using the most current data available.  Another advantage of utilizing Esri REST platforms is that they are available to non Esri clients allowing users to avoid costly subscription fees surrounding ArcGIS and other Esri software.  Throughout this tutorial, we will be exploring how to query, clean, and map spatial data describing administrative forest boundaries. These data are published by the U.S. Forest Service.
 
 It may surprise you to learn that it is often more challenging to navigate to the Rest API than to query it, especially for new users.  For the sake of making this tutorial applicable to other Esri REST APIs, we will go through the initial steps of locating these resources.
 
@@ -124,10 +126,7 @@ We then set the input spatial reference.  Here we are supplying the API with the
 
 **resultRecordCount**
 
-This parameter simply dictates how many observations we would like the API to return.  The maximum number of records that can be returned is 1000, which is the default value for most REST APIs.  The maximum value of records that can be returned is set by the server administrator.  If leave this field blank 1000 values will be returned, indicating that the number of requested records exceeds the maximum.  Also, another indicator that the maximum number of records has been met is a boolean variable will appear at the top of the requested GeoJSON page called exceededTransferLimit.
-
-
-If you would like to obtain a set of records within a given geometry which exceed the maximum, you should split your geometry over multiple requests, such that each individual geometry contains less than the given maximum.  If you'd like to give this a try on your own the following code is a good start.
+This parameter simply dictates how many observations we would like the API to return.  The maximum number of records that can be returned is 1000, which is the default value for most REST APIs.  The maximum value of records that can be returned is set by the server administrator.  If leave this field blank 1000 values will be returned, indicating that the number of requested records exceeds the maximum.  Also, another indicator that the maximum number of records has been met is a boolean variable will appear at the top of the requested GeoJSON page called exceededTransferLimit.  If you would like to obtain a set of records within a given geometry which exceed the maximum, you should split your geometry over multiple requests, such that each individual geometry contains less than the given maximum. (See exercises for more information)
 
 ```{r split_request, message=FALSE, echo=TRUE}
 #Convert bounding box of tahoe national forest to polygon
@@ -138,8 +137,7 @@ bbox <- st_bbox(forest) %>%
 #split bounding box polygon into a 2x2 grid
 bbox_split <- st_make_grid(bbox,n=2)
 ```
-A full solution to this can be found on our github page
----------------------------------finish ^^^-------------------------------------------
+
 
 **spatialRel**
 
@@ -208,17 +206,53 @@ leaflet() %>%
 
 And there you have it!  We hope this tutorial has been informative!
 
-References and Useful Linkes:
+**Exercises:**
+
+1.  Attempt to obtain all observations of invasive plants within the Tahoe National Forest by splitting the bounding box into quarters and querying the Current Invasive Species Locations APIs for each individual quarter.
+
++ Obtain the bounding box of the Tahoe National and convert it into a polygon with `st_as_sfc()`
+
++ Split the polygon into quarters with `st_make_grid(tahoeBox, n=2)`
+  
++ Query API for each quarter of the bounding box (Bonus points if you can combine each of the returned sf objects into one)
+          
++ Make an interactive leaflet plot displaying the boundaries of the Tahoe National Forest, the quartered bounding box, and invasive locations within the Tahoe
 
 
 
+We encourage you to compare your work to the **excercise solutions** which can be found on [github](https://github.com/edixon1/esriRestExerciseAnswers).
 
 
+**References:**
+
+This tutorial was created in RStudion 1.2.5033 (RStudio Team, 2015), using R 3.6.2 (R Core Team, 2020) and RMarkdown 2.0 (Allaire J, 2019).
+
+The following packages were utilized, to obtain, clean, and visualize data:
+
++ sf (v0.9.2; Edzer Pebesma, 2020)
+
++ leaflet (v2.0.3; Joe Cheng, 2019)
+
++ geojsonsf (v1.3.3; David Cooley, 2020)
+
++ dplyr (v0.8.3; Hadley Wickham, 2019)
+
++ urltools (v1.7.3; Os Keyes, 2019)
 
 
+**Useful Links:**
 
++ [Esri Rest API Reference](https://gis.fws.gov/arcgis/sdk/rest/index.html#//02ss0000006v000000)
 
++ [Coordinate Reference System and Spatial Projection](https://www.earthdatascience.org/courses/earth-analytics/spatial-data-r/intro-to-coordinate-reference-systems/) (Leah Wasser, Earth Data Science, 2019)
 
++ [data.gov](data.gov)
+
++ [data.gov.uk](data.gov.uk)
+
++ [open.canada.ca](open.canada.ca)
+
++ [European Environment Agency Discover Map Services](http://discomap.eea.europa.eu/Index/Index.aspx)
 
 
 
