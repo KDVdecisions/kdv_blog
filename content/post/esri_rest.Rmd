@@ -126,18 +126,7 @@ We then set the input spatial reference.  Here we are supplying the API with the
 
 **resultRecordCount**
 
-This parameter simply dictates how many observations we would like the API to return.  The maximum number of records that can be returned is 1000, which is the default value for most REST APIs.  The maximum value of records that can be returned is set by the server administrator.  If leave this field blank 1000 values will be returned, indicating that the number of requested records exceeds the maximum.  Also, another indicator that the maximum number of records has been met is a boolean variable will appear at the top of the requested GeoJSON page called exceededTransferLimit.  If you would like to obtain a set of records within a given geometry which exceed the maximum, you should split your geometry over multiple requests, such that each individual geometry contains less than the given maximum. (See exercises for more information)
-
-```{r split_request, message=FALSE, echo=TRUE}
-#Convert bounding box of tahoe national forest to polygon
-
-bbox <- st_bbox(forest) %>%
-  st_as_sfc()
-
-#split bounding box polygon into a 2x2 grid
-bbox_split <- st_make_grid(bbox,n=2)
-```
-
+This parameter simply dictates how many observations we would like the API to return.  The maximum number of records that can be returned is 1000, which is the default value for most REST APIs.  The maximum value of records that can be returned is set by the server administrator.  If we leave this field blank 1000 values will be returned, indicating that the number of requested records exceeds the maximum.  Another indicator that the maximum number of records has been met is a boolean variable that will appear at the top of the requested GeoJSON page called exceededTransferLimit.  If you would like to obtain a set of records within a given geometry which exceed the maximum, you should split your geometry over multiple requests, such that each individual geometry contains less than the given maximum. (See *Exercise 2* at the end of this document for more information)
 
 **spatialRel**
 
@@ -153,7 +142,7 @@ This is the parameter which dictates which fields of the dataset will be returne
 
 We will not go into the remaining parameters, if you'd like to explore them yourself you can do so within the [API reference](https://gis.fws.gov/arcgis/sdk/rest/index.html#//02ss0000006v000000).  
 
-The rest of parameters I've set at their default value.  Note, if the default values of a parameter are being used their values do not need to be set within your query. For the purposes of this tutorial they were included to give a clear representation of parameters versus the base URL.  The following (significantly smaller) chunk of code would accomplish the same goal.
+The rest of parameters I've set at their default value.  Note, if the default values of a parameter are being used their values do not need to be set within your query. For the purposes of this tutorial they were included to give a clear representation of parameters versus the base URL.  The following (significantly smaller) chunk of code would accomplish the same goal.  It should also be noted that esriSpatialRelIntersects is the default value of spatialRel.
 
 ```{r query_invasive, echo=TRUE, warning = F, message=F, results=F}
 #baseURL for  Forest Service invasive species API
@@ -171,7 +160,6 @@ epsg <- st_crs(forest)$epsg
 query <- urltools::param_set(baseURL,key="geometry", value=bbox) %>%
   param_set(key="inSR", value=epsg) %>%
   param_set(key="resultRecordCount", value=500) %>%
-  param_set(key="spatialRel", value="esriSpatialRelIntersects") %>%
   param_set(key="f", value="geojson") %>%
   param_set(key="outFields", value="*")
 invasives <- geojson_sf(query)
@@ -187,9 +175,9 @@ leaflet() %>%
   addPolygons(data=invasives, weight=3, color="red")
 ```
 
-Great!  We have our invasive plant locations, as well as the boundaries to the Tahoe National Forest.  Except, it seems that we have a decent number of invasive plant observations that fall outside the boundary of the national forest.  If you remember, we passed a bounding box to the API, therefore we got all observations that intersected the bounding box rather than the polygon itself.
+Great!  We have our invasive plant locations, as well as the boundaries to the Tahoe National Forest.  Except, it seems that we have a decent number of invasive plant observations that don't intersect the boundary of the national forest.  If you remember, we passed a bounding box to the API, therefore we got all observations that intersected the bounding box rather than the polygon itself.
 
-Let's filter out all of the observations from the invasive plant API that fall outside of the Tahoe National Forest polygon.
+Let's filter out all of the observations from the invasive plant API that don't intersect the Tahoe National Forest polygon.
 
 ```{r filter_invasives, message=FALSE, echo=TRUE}
 
@@ -206,15 +194,38 @@ leaflet() %>%
 
 And there you have it!  We hope this tutorial has been informative!
 
-**Exercises:**
+**Exercises:** (Solutions available on [github](https://github.com/edixon1/esriRestExerciseAnswers))
 
-1.  Attempt to obtain all observations of invasive plants within the Tahoe National Forest by splitting the bounding box into quarters and querying the Current Invasive Species Locations APIs for each individual quarter.
+1.  Use what you've learned throughout this tutorial to obtain and plot the major rivers of Spain.  Use the following APIs (provided by European Environment Agency Discover Map Services): 
 
-+ Obtain the bounding box of the Tahoe National and convert it into a polygon with `st_as_sfc()`
++ [European Countries API base URL](https://bio.discomap.eea.europa.eu/arcgis/rest/services/Internal/Basemap_EEA_countries_WM/MapServer/5/query)
+
++ [Hydrography API base URL](https://maratlas.discomap.eea.europa.eu/arcgis/rest/services/Maratlas/Hydrography/MapServer/13/query)
+
+The figure below contains a data sample from the European Countries API
+
+![Exercise Fig. 1](/post/esri_rest_files/countryData.png)
+
++ Construct a query to the European Countries API to obtain a polygon for the borders of Spain  (Hint: Since we know that each country in the world has a unique 2-Digit ISO code, consider using that within your WHERE parameter)
+
++ Use the returned data to derive and format a bounding box
+
++ Use the bounding box of Spain to query the Hydrography API to obtain the main rivers that intersect your bounding box.
+
++ Filter out all rivers that do not intersect Spain
+
++ create an interactive leaflet plot to display your data (Hint: The rivers are represented by Polyline objects so leaflet::addPolyLine() should be utilized to add them to your plot)
+
+
+2.  Obtain all observations of invasive plants within the Tahoe National Forest by splitting the bounding box into quarters and querying the Current Invasive Species Locations APIs for each individual quarter:
+
++ Derive the bounding box of the Tahoe National and convert it into a polygon with `st_as_sfc()`
 
 + Split the polygon into quarters with `st_make_grid(tahoeBox, n=2)`
   
-+ Query API for each quarter of the bounding box (Bonus points if you can combine each of the returned sf objects into one)
++ Query API for each quarter of the bounding box (bonus points if you can combine each of the returned sf objects into one)
+
++ Filter out observations that do not intersect the Tahoe National Forest
           
 + Make an interactive leaflet plot displaying the boundaries of the Tahoe National Forest, the quartered bounding box, and invasive locations within the Tahoe
 
