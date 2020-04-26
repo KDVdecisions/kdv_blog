@@ -9,7 +9,7 @@ tags: ["R Markdown", "R", "APIs", "Spatial Data", "Leaflet", "Esri"]
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
-A massive amount of spatial data is available through Esri REST APIs.  It is a popular publishing format for federal, state, and county governments so many of these data fall within the public domain.  At the time of writing, there are 7266 datasets published on [data.gov](data.gov), 3426  sets on [data.gov.uk](data.gov.uk), and 859 on [open.canada.ca](open.canada.ca) all of which are available through Esri REST APIs.  A large set of Esri REST APIs which provide data on European countries can be found at [European Environment Agency Discover Map Services](http://discomap.eea.europa.eu/Index/Index.aspx).
+A massive amount of spatial data is available through Esri REST APIs.  It is a popular publishing format for federal, state, and county governments so many of these data fall within the public domain.  At the time of writing, there are 7266 datasets published on [data.gov](data.gov), 3426  sets on [data.gov.uk](data.gov.uk), and 859 on [open.canada.ca](open.canada.ca) all of which are available through Esri REST APIs.  Another large set of Esri REST APIs can be found at [European Environment Agency Discover Map Services](http://discomap.eea.europa.eu/Index/Index.aspx).
 
 Many of these data are also available for download via other formats such as Geodatabase, shape, and zipped files.  An advantage of learning to use Esri REST services over these other formats is that a user may filter their data prior to storing it locally, limiting download size and required data cleaning/filtering.  Users may also go on to implement use of these APIs within programs and scripts and know that they are using the most current data available.  Another advantage of utilizing Esri REST platforms is that they are available to non Esri clients allowing users to avoid costly subscription fees surrounding ArcGIS and other Esri software.  Throughout this tutorial, we will be exploring how to query, clean, and map spatial data describing administrative forest boundaries. These data are published by the U.S. Forest Service.
 
@@ -55,7 +55,9 @@ This essentially makes a request to the API for an occurrence where the value wi
 
 Now that we've played with the query page just a bit, let's begin to see how we might implement this in R.  
 
-If you haven't already noticed, each time you hit Query (GET) the URL in the top of your browser updates.  This is your query URL.  We will be using a few libraries within this tutorial for obtaining and viewing spatial data.  If you don't have the following packages you should install them via `install.packages('')` before proceeding.
+If you haven't already noticed, each time you hit Query (GET) the URL in the top of your browser updates.  This is your query URL.  
+
+We will be using a few libraries within this tutorial for obtaining and viewing spatial data.  If you don't have the following packages you should install them via `install.packages('')` before proceeding.
 
 ```{r libraries, echo=TRUE,warning=FALSE,message=FALSE}
 library(sf)
@@ -65,7 +67,9 @@ library(dplyr)
 library(urltools)
 ```
 
-Change the **Format** field at the bottom of your page to GeoJSON and make another query.  This time you should be redirected to a page containing the GeoJSON file describing the output from your query.  GeoJSON is a simple and lightweight file format based on JSON (JavaScript Object Notation) designed to represent spatial data alongside non-spatial features.  GeoJSON and JSON objects are syntactically identical to the code one would use to create a JavaScript object.  Now that we have the location of the relevant GeoJSON file, copy the URL from the top of your page and pass it to `geojson_sf()`.
+Change the **Format** field at the bottom of your page to GeoJSON and make another query.  This time you should be redirected to a page containing the GeoJSON file describing the output from your query.  GeoJSON is a simple and lightweight file format based on JSON (JavaScript Object Notation) designed to represent spatial data alongside non-spatial features.  GeoJSON and JSON objects are syntactically identical to the code one would use to create a JavaScript object.  
+
+Now that we have the location of the relevant GeoJSON file, copy the URL from the top of your page and pass it to `geojson_sf()`.
 
 ```{r read_query, include=TRUE, warning=FALSE}
 forest <- geojson_sf("https://apps.fs.usda.gov/arcx/rest/services/EDW/EDW_ForestSystemBoundaries_01/MapServer/0/query?where=FORESTNAME+LIKE+%27%25Tahoe+National%25%27&text=&objectIds=&time=&geometry=&geometryType=esriGeometryEnvelope&inSR=&spatialRel=esriSpatialRelIntersects&relationParam=&outFields=*&returnGeometry=true&returnTrueCurves=false&maxAllowableOffset=&geometryPrecision=&outSR=&having=&returnIdsOnly=false&returnCountOnly=false&orderByFields=&groupByFieldsForStatistics=&outStatistics=&returnZ=false&returnM=false&gdbVersion=&historicMoment=&returnDistinctValues=false&resultOffset=&resultRecordCount=&queryByDistance=&returnExtentOnly=false&datumTransformation=&parameterValues=&rangeValues=&quantizationParameters=&featureEncoding=esriDefault&f=geojson")
@@ -79,7 +83,19 @@ leaflet() %>%
   addProviderTiles("Esri.WorldStreetMap") %>%
   addPolygons(data=forest, weight=2, color="blue")
 ```
-Now let's try querying another Forest Service Esri REST API.  However, this time we'll construct the query from within R.  Let's utilize the data we just obtained to get the invasive plant locations that fall within the Tahoe National Forest.  To accomplish this, we will take the polygon that describes the Tahoe National Forest and use that data to define a bounding box.  A bounding box is a rectangle represented by four points (xmax, ymax, xmin, ymin) in which a spatial object is fully enclosed.  We will then pass that bounding box to the Current Invasive Plant Location API and request the data that intersects it.
+Now let's try querying another Esri Map API except this time we'll build our query from within R.  The Forest Service provides another API titled Current Invasive Plant Locations.  Let's utilize the data we just obtained to get the locations of invasive plant observations within the Tahoe National Forest.  We just queried an API based on the value of a field within the data (WHERE FORESTNAME LIKE '%TAHOE NATIONAL%').  Now we're going to build a query based on the spatial information returned from our previous query.  To accomplish this we will take the polygon that describes the Tahoe National Forest and use that data to define a bounding box.  A bounding box is a rectangle represented by four points (xmax, ymax, xmin, ymin) in which a spatial object is fully enclosed.  Take a look!
+
+```{r bounding_box_plot, echo=TRUE, message=FALSE}
+#derive bounding box and convert it to Polygon so we can plot it
+bboxPoly <- st_bbox(forest) %>%
+  st_as_sfc()
+
+leaflet() %>%
+  addProviderTiles("Esri.WorldStreetMap") %>%
+  addPolygons(data=forest, weight=2,color="blue") %>%
+  addPolygons(data=bboxPoly, weight=2, fill=FALSE, color="blue")
+```
+Then we'll pass the four points which describe the bounding box to the Current Invasive Plant Location API and request the data that intersects it.
 
 ```{r query_invasive_short, echo=TRUE, warning = F, message=F, results=F}
 #baseURL for  Forest Service invasive species API
