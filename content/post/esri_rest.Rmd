@@ -142,7 +142,7 @@ We then set the input spatial reference.  Here we are supplying the API with the
 
 **resultRecordCount**
 
-This parameter simply dictates how many observations we would like the API to return.  The maximum number of records that can be returned is 1000, which is the default value for most REST APIs.  The maximum value of records that can be returned is set by the server administrator.  If we leave this field blank 1000 values will be returned, indicating that the number of requested records exceeds the maximum.  Another indicator that the maximum number of records has been met is a boolean variable that will appear at the top of the requested GeoJSON page called exceededTransferLimit.  If you would like to obtain a set of records within a given geometry which exceed the maximum, you should split your geometry over multiple requests, such that each individual geometry contains less than the given maximum. (See *Exercise 2* at the end of this document for more information)
+This parameter simply dictates how many observations we would like the API to return.  The maximum number of records that can be returned is 1000, which is the default value for most REST APIs.  The maximum value of records that can be returned is set by the server administrator.  If we leave this field blank 1000 values will be returned, indicating that the number of requested records exceeds the maximum.  Another indicator that the maximum number of records has been met is a boolean variable that will appear at the top of the requested GeoJSON page called exceededTransferLimit.  If you would like to obtain a set of records within a given geometry which exceed the maximum, you should split your geometry over multiple requests, such that each individual input geometry contains less than the given maximum. (See *Exercise 2* at the end of this document for more information)
 
 **spatialRel**
 
@@ -154,7 +154,7 @@ format is the file format in which our data will be returned.
 
 **outFields**
 
-This is the parameter which dictates which fields of the dataset will be returned.  We pass an asterisk in order to get all fields.  Alternatively if we just wanted the name of the plant alongside its geometry we could pass ACCEPTED_COMMON_NAME to outFields.
+This is the parameter which dictates which fields of the dataset will be returned.  We pass an asterisk in order to get all fields.  Alternatively if we just wanted the common name of the plant alongside its geometry we could pass ACCEPTED_COMMON_NAME to outFields.
 
 We will not go into the remaining parameters, if you'd like to explore them yourself you can do so within the [API reference](https://gis.fws.gov/arcgis/sdk/rest/index.html#//02ss0000006v000000).  
 
@@ -212,7 +212,7 @@ And there you have it!  We hope this tutorial has been informative!
 
 **Exercises:** (Solutions available on [github](https://github.com/edixon1/esriRestExerciseAnswers))
 
-1.  Use what you've learned throughout this tutorial to obtain and plot the major rivers of Spain.  Use the following APIs (provided by European Environment Agency Discover Map Services): 
+**1.**  Use what you've learned throughout this tutorial to obtain and plot the major rivers of Spain.  Use the following APIs (provided by European Environment Agency Discover Map Services): 
 
 + [European Countries API base URL](https://bio.discomap.eea.europa.eu/arcgis/rest/services/Internal/Basemap_EEA_countries_WM/MapServer/5/query)
 
@@ -233,13 +233,13 @@ The figure below contains a data sample from the European Countries API
 + create an interactive leaflet plot to display your data (Hint: The rivers are represented by Polyline objects so leaflet::addPolyLine() should be utilized to add them to your plot)
 
 
-2.  Obtain all observations of invasive plants within the Tahoe National Forest by splitting the bounding box into quarters and querying the Current Invasive Species Locations APIs for each individual quarter:
+**2.**  Obtain all observations of invasive plants within the Tahoe National Forest by splitting the bounding box into quarters and querying the Current Invasive Species Locations APIs for each individual quarter:
 
 + Derive the bounding box of the Tahoe National and convert it into a polygon with `st_as_sfc()`
 
 + Split the polygon into quarters with `st_make_grid(tahoeBox, n=2)`
   
-+ Query API for each quarter of the bounding box (bonus points if you can combine each of the returned sf objects into one)
++ Query the API for each quarter of the bounding box (bonus points if you can combine each of the returned sf objects into one)
 
 + Filter out observations that do not intersect the Tahoe National Forest
           
@@ -252,9 +252,11 @@ We encourage you to compare your work to the **excercise solutions** which can b
 
 **References:**
 
-This tutorial was created in RStudion 1.2.5033 (RStudio Team, 2015), using R 3.6.2 (R Core Team, 2020) and RMarkdown 2.0 (Allaire J, 2019).
+This tutorial was created in RStudio 1.2.5033 (RStudio Team, 2015), using R 3.6.2 (R Core Team, 2020) and RMarkdown 2.0 (J.J. Allaire, 2019).  
 
-The following packages were utilized, to obtain, clean, and visualize data:
+We utilized two APIs, S_USA.InvasivePlantCurrent (Natural Resource Information Systems, U.S. Forest Service, 2020) and Administrative Forest (Automated Lands Program, U.S. Forest Service, 2020).
+
+The following packages were utilized to obtain, clean, and visualize data:
 
 + sf (v0.9.2; Edzer Pebesma, 2020)
 
@@ -272,6 +274,14 @@ The following packages were utilized, to obtain, clean, and visualize data:
 + [Esri Rest API Reference](https://gis.fws.gov/arcgis/sdk/rest/index.html#//02ss0000006v000000)
 
 + [Coordinate Reference System and Spatial Projection](https://www.earthdatascience.org/courses/earth-analytics/spatial-data-r/intro-to-coordinate-reference-systems/) (Leah Wasser, Earth Data Science, 2019)
+
+*API Meta data:*
+
++ [S_USA.InvasivePlantCurrent](https://data.fs.usda.gov/geodata/edw/edw_resources/meta/S_USA.InvasivePlantCurrent.xml)
+
++ [Administrative Forest](https://data.fs.usda.gov/geodata/edw/edw_resources/meta/S_USA.AdministrativeForest.xml)
+
+*Resources*
 
 + [data.gov](data.gov)
 
