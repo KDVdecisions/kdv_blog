@@ -43,6 +43,8 @@ FORESTNAME = 'Angeles National Forest'
 
 into the WHERE field.  
 
+Esri Rest query statements, like SQL, are sensitive to the types of quotes one uses.  Thus the above where statement works, however `FORESTNAME = "Angeles National Forest"` would return an error.  If your queries are continually returning errors or empty values ensure you're using single quotes and your capitalization is correct!
+
 Enter an asterisk (\*)into the Out Fields parameter.  This indicates you wish to return all fields within the dataset.  Hit **Query (GET)** at the bottom of the page and you should see some HTML describing an entry within the dataset appear at the base of your window.  Hurray!  You have successfully queried an Esri REST API!
 
 Moving forward, let's generalize this WHERE clause just a bit.  For instance, let's say you aren't quite certain about the name of the national forest polygon you're interested in obtaining.  Or, better yet, let's say you're implementing this query within a program which takes in user input describing which national forest polygon to request, however you can't depend on your users to enter a full or exact forest name.  Try:
@@ -75,6 +77,8 @@ Now that we have the location of the relevant GeoJSON file, copy the URL from th
 forest <- geojson_sf("https://apps.fs.usda.gov/arcx/rest/services/EDW/EDW_ForestSystemBoundaries_01/MapServer/0/query?where=FORESTNAME+LIKE+%27%25Tahoe+National%25%27&text=&objectIds=&time=&geometry=&geometryType=esriGeometryEnvelope&inSR=&spatialRel=esriSpatialRelIntersects&relationParam=&outFields=*&returnGeometry=true&returnTrueCurves=false&maxAllowableOffset=&geometryPrecision=&outSR=&having=&returnIdsOnly=false&returnCountOnly=false&orderByFields=&groupByFieldsForStatistics=&outStatistics=&returnZ=false&returnM=false&gdbVersion=&historicMoment=&returnDistinctValues=false&resultOffset=&resultRecordCount=&queryByDistance=&returnExtentOnly=false&datumTransformation=&parameterValues=&rangeValues=&quantizationParameters=&featureEncoding=esriDefault&f=geojson")
 
 ```
+It should be noted that this code may generate a warning message stating 'incomplete final line found.'  This is a result of the geojson file missing an end of file marker or a return at its end.  This can safely be ignored in the context of this tutorial.
+
 
 Let's take a look at this data!
 
@@ -138,7 +142,9 @@ The first parameter is the input geometry, to which we pass the bounding box of 
 
 **inSR**
 
-We then set the input spatial reference.  Here we are supplying the API with the coordinate reference system of our polygon.  Without getting into too much detail, a coordinate reference system (commonly referred to as a CRS) is a reference point which provides context to coordinates (the coordinates of our bounding box in this case).  If you're curious to learn more about coordinate reference systems an excellent explaination can be found [here](https://www.earthdatascience.org/courses/earth-analytics/spatial-data-r/intro-to-coordinate-reference-systems/).  
+We then set the input spatial reference.  Here we are supplying the API with the coordinate reference system of our polygon.  Without getting into too much detail, a coordinate reference system (commonly referred to as a CRS) is a reference point which provides context to coordinates (the coordinates of our bounding box in this case).  The two main categories of coordinate reference systems are geographic and projected.  Geographic systems are based on a spheroid and utilize angular units of measurement such as degrees of longitude or latitude.  Projected systems are a spheroid projected onto 2-dimensional surface.  EPSG:4326 and EPSG:3857 are two very common coordinate reference systems, the first being geographic and the latter being projected.
+
+If you're curious to learn more about coordinate reference systems an excellent explaination can be found [here](https://www.earthdatascience.org/courses/earth-analytics/spatial-data-r/intro-to-coordinate-reference-systems/).  
 
 **resultRecordCount**
 
@@ -201,7 +207,11 @@ Let's filter out all of the observations from the invasive plant API that don't 
 insideInvasives <- st_join(invasives,forest)
 #remove na values (i.e. values where there is no spatial overlap)
 insideInvasives <- na.omit(insideInvasives)
+```
 
+Note: the call to st_join() generates a message stating 'although coordinates are longitude/latitude, st_intersects assumes that they are planar.'  This message was generated because we have passed an object which uses a geographic coordinate reference system to a function which assumes our data has been projected onto a 2-dimensional surface.  In the context of this calculation the difference in results with a geographic versus projected CRS is negligible.  However, if you are performing operations on data that spans an entire continent or is near either terrestial pole it can cause your calculations to return incorrect results.  You should always carefully select your coordinate reference system prior to performing geographic calculations!
+
+```{r map_insideInvasives}
 leaflet() %>%
   addProviderTiles("Esri.WorldStreetMap") %>%
   addPolygons(data=forest, weight=2, color="blue") %>%
@@ -212,17 +222,21 @@ And there you have it!  We hope this tutorial has been informative!
 
 **Exercises:** (Solutions available on [github](https://github.com/edixon1/esriRestExerciseAnswers))
 
-**1.**  Use what you've learned throughout this tutorial to obtain and plot the major rivers of Spain.  Use the following APIs (provided by European Environment Agency Discover Map Services): 
+**1.**  Use what you've learned throughout this tutorial to obtain and plot the major rivers of Spain.  
 
-+ [European Countries API base URL](https://bio.discomap.eea.europa.eu/arcgis/rest/services/Internal/Basemap_EEA_countries_WM/MapServer/5/query)
++ These data can be located at the [European Environment Agency Discover Map Services](http://discomap.eea.europa.eu/Index/Index.aspx)
 
-+ [Hydrography API base URL](https://maratlas.discomap.eea.europa.eu/arcgis/rest/services/Maratlas/Hydrography/MapServer/13/query)
++ Locate the [European Countries API](https://bio.discomap.eea.europa.eu/arcgis/rest/services/Internal/Basemap_EEA_countries_WM/MapServer) and the [Hydrography API](https://maratlas.discomap.eea.europa.eu/arcgis/rest/services/Maratlas/Hydrography/MapServer)
 
-The figure below contains a data sample from the European Countries API
++ Explore the available data layers within each API in the ArcGIS Online Map Viewer.  Note: Maker sure you select 'View in:' ArcGIS Online Mapviewer not 'View footprint in:'
 
-![Exercise Fig. 1](/post/esri_rest_files/countryData.png)
++ Use the Contents pane in the left hand side of the mapviewer to toggle which data layers are shown
 
-+ Construct a query to the European Countries API to obtain a polygon for the borders of Spain  (Hint: Since we know that each country in the world has a unique 2-Digit ISO code, consider using that within your WHERE parameter)
++ Hover your cursor over a layer name in the contents pane and select Show Table (small icon which looks like a data table) to view the data within that layer
+
++ Use the information you gather here to decide which data layers to utilize and how to construct your query
+
++ Query the European Countries API and obtain a polygon for Spain (Try to construct your query within R)
 
 + Use the returned data to derive and format a bounding box
 
@@ -247,7 +261,7 @@ The figure below contains a data sample from the European Countries API
 
 
 
-We encourage you to compare your work to the **excercise solutions** which can be found on [github](https://github.com/edixon1/esriRestExerciseAnswers).
+We encourage you to compare your work to the **exercise solutions** which can be found on [github](https://github.com/edixon1/esriRestExerciseAnswers).
 
 
 **References:**
