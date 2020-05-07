@@ -228,7 +228,7 @@ And there you have it!  We hope this tutorial has been informative!
 
 + Locate the [European Countries API](https://bio.discomap.eea.europa.eu/arcgis/rest/services/Internal/Basemap_EEA_countries_WM/MapServer) and the [Hydrography API](https://maratlas.discomap.eea.europa.eu/arcgis/rest/services/Maratlas/Hydrography/MapServer)
 
-+ Explore the available data layers within each API in the ArcGIS Online Map Viewer.  Note: Ensure you select 'View in:' ArcGIS Online Mapviewer not 'View footprint in:'
++ Explore the available data layers within each API in the ArcGIS Online Map Viewer.  Note: Ensure you select ArcGIS Online Mapviewer under 'View in:' not 'View footprint in:'
 
 + Use the Contents pane in the left hand side of the mapviewer to toggle which data layers are shown
 
@@ -305,8 +305,13 @@ The following packages were used to obtain, clean, and visualize data:
 
 + [European Environment Agency Discover Map Services](http://discomap.eea.europa.eu/Index/Index.aspx)
 
+------
+If you'd like to learn more, KDV offers R instruction through customized workshops and classes at [Transmitting Science](https://www.transmittingscience.com).
 
+```{r echo=FALSE, message=FALSE,fig.align='left'}
+knitr::include_graphics("/post/esri_rest_files/kdv_TransmittingScience.png")
 
+```
 
 
 
