@@ -307,7 +307,7 @@ The following packages were used to obtain, clean, and visualize data:
 
 *Other Useful R Tools:*
 
-Thanks to Jason Jones on LinkedIn for providing a reference to the [Esri2sf](https://github.com/yonghah/esri2sf), an R package designed to scrape features from ArcGIS Servers.  This and many other R packages can be utilized to obtain data sets from specific sources!
+Thanks to Jason Jones on LinkedIn for providing a reference to [Esri2sf](https://github.com/yonghah/esri2sf), an R package designed to scrape features from ArcGIS Servers.  This and many other R packages can be utilized to obtain data sets from specific sources.
 
 Other useful packages include:
 
