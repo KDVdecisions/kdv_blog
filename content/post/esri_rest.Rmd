@@ -295,7 +295,7 @@ The following packages were used to obtain, clean, and visualize data:
 
 + [Administrative Forest](https://data.fs.usda.gov/geodata/edw/edw_resources/meta/S_USA.AdministrativeForest.xml)
 
-*Resources*
+*Resources:*
 
 + [data.gov](data.gov)
 
@@ -305,14 +305,22 @@ The following packages were used to obtain, clean, and visualize data:
 
 + [European Environment Agency Discover Map Services](http://discomap.eea.europa.eu/Index/Index.aspx)
 
+*Other Useful R Tools:*
+
+Thanks to Jason Jones on LinkedIn for providing a reference to the [Esri2sf](https://github.com/yonghah/esri2sf), an R package designed to scrape features from ArcGIS Servers.  This and many other R packages can be utilized to obtain data sets from specific sources!
+
+Other useful packages include:
+
++ [rgbif](https://cran.r-project.org/web/packages/rgbif/rgbif.pdf):  Allows users to access to GBIF, a database of species occurrence records
+
++ [dataRetrieval](https://cran.r-project.org/web/packages/dataRetrieval/vignettes/dataRetrieval.html): Provides access to EPA water quality data
+
++ [nhdplusTools](https://cran.r-project.org/web/packages/nhdplusTools/nhdplusTools.pdf): A set of tools to access and manipulate hydrographic
+
 ------
 If you'd like to learn more, KDV offers R instruction through customized workshops and classes at [Transmitting Science](https://www.transmittingscience.com).
 
-```{r echo=FALSE, message=FALSE,fig.align='left'}
-knitr::include_graphics("/post/esri_rest_files/kdv_TransmittingScience.png")
-
-```
-
+![](/post/esri_rest_files/kdv_TransmittingScience.png)
 
 
 
